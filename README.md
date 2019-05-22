@@ -11,8 +11,6 @@ To clone and run this repository you'll need [Git](https://git-scm.com) and [Nod
 git clone https://github.com/mrgentledolphin/AnimeForce-Downloader.git
 cd AnimeForce-Downloader
 npm install
-# create download folder
-mkdir Downloads
 # run the program
 npm start
 ```
