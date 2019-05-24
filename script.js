@@ -4,6 +4,9 @@ const { JSDOM } = jsdom
 // global.document = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`).window.document
 const http = require('http')
 const fs = require('fs')
+const { shell } = require('electron')
+const openload = require('openload-link')
+
 
 document.querySelector('#startBtn').addEventListener('click', (e) => {
     e.preventDefault()
@@ -35,11 +38,11 @@ document.querySelector('#startBtn').addEventListener('click', (e) => {
 
 })
 
-document.querySelector('#resetBtn').addEventListener('click', (e) => {
+/* document.querySelector('#resetBtn').addEventListener('click', (e) => {
     e.preventDefault()
     document.querySelector('.bars').innerHTML = ''
 })
-
+ */
 let out = document.querySelector('#out')
 function writeToPage(text) {
     out.innerHTML = text
@@ -57,10 +60,10 @@ function download(url) {
     })
 
     let bar = `
-        <div class="loadingBar">
+        <div class="loadingBar${idClass}">
 			<p class="info${idClass}"></p>
-			<div class="progress">
-				<div class="determinate bar${idClass}" style="width: 0%"></div>
+			<div class="progress orange accent-1">
+				<div class="determinate bar${idClass} orange accent-3" style="width: 0%"></div>
 			</div>
 		</div>
     `
@@ -77,7 +80,7 @@ function download(url) {
         speed = stats.size - prec
         prec = stats.size
         document.querySelector(`.info${idClass}`).innerHTML = `
-            ${currentName}: ${Math.round(perc)}% -\t ${Math.round(speed / 1024)}KB/s
+            ${currentName}: ${Math.round(perc)}% -\t ${Math.round(speed / 1024)}KB/s -\t ${Math.round(stats.size / 1048576)}/${Math.round(totalSize / 1048576)}MB
         `
         for (let i = 0; i < 100; i++) {
             if (temp > 1) {
@@ -88,6 +91,7 @@ function download(url) {
             }
         }
         if (perc == 100) {
+            document.querySelector(`.loadingBar${idClass}`).innerHTML = ''
             clearInterval(interval)
         }
     }, 1000)
@@ -99,14 +103,22 @@ function estraiVideo(rawHTML) {
     doc.innerHTML = rawHTML
     let links = doc.getElementsByTagName("source")
     let urls = []
+    let openloadUrls = []
 
     let temp
     let link
     for (let i = 0; i < links.length; i++) {
         if (links[i].getAttribute("src") != null) {
+            console.log(links[i])
             if (links[i].getAttribute("src").indexOf('.mp4') >= 0) {
                 temp = links[i].getAttribute("src")
                 urls.push(temp)
+            }
+            if (links[i].getAttribute("src").indexOf('openload.co') >= 0) {
+                openload(input_link).then((output_link) => {
+                    M.toast({html: `Openload link detected: opening in browser ${output_link}`})
+                    shell.openExternal(output_link)
+                })
             }
         }
     }
